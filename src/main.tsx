@@ -18,9 +18,13 @@ const levels = [
 ];
 const money = (value:number) => new Intl.NumberFormat('ru-RU').format(value)+' ₽';
 const price = (p:Product) => p.salePrice === null ? 'SECRET PRICE — уточняется индивидуально' : money(p.salePrice);
-const percent = new Intl.NumberFormat('ru-RU', { style:'percent', maximumFractionDigits:1 });
+const campaignDiscounts: Record<string, number> = {
+  '01':40, '02':30, '03':35, '04':35, '05':40, '06':50, '08':50, '07':30, '09':25,
+};
+const percent = new Intl.NumberFormat('ru-RU', { style:'percent', maximumFractionDigits:0 });
 function discount(p:Product) {
-  if (p.isSecretPrice) return '−30% на оба тарифа';
+  const configured=campaignDiscounts[p.id];
+  if (configured !== undefined) return '−'+configured+'%'+(p.isSecretPrice?' на оба тарифа':'');
   if (p.oldPrice === null || p.salePrice === null || p.oldPrice <= p.salePrice) return '';
   return '−'+percent.format((p.oldPrice-p.salePrice)/p.oldPrice);
 }
@@ -175,7 +179,7 @@ function ContactModal({p,actions,close}:{p:Product|null,actions:Purchase,close:(
   const chosen=p && actions.selected.includes(p.id);
   const message=p?.isSecretPrice?'Привет! Хочу узнать SECRET PRICE, условия участия и подробности обоих тарифов курса VENERA.':p?'Привет! Хочу обсудить персональное сопровождение и мой запрос.':'Привет! Помоги мне, пожалуйста, выбрать подходящий формат на Чёрную пятницу.';
   return <Modal title={p?.isSecretPrice?'Узнать SECRET PRICE':p?'Личное сопровождение':'Помоги мне выбрать'} close={close}>
-    <p>{p?.isSecretPrice?'Запроси условия участия в VENERA. На Чёрную пятницу действует скидка −30% на оба тарифа.':p?'Расскажи Анне, с каким запросом хочешь поработать.':'Расскажи, что тебя сейчас интересует, чтобы Анна могла подсказать формат.'}</p>
+    <p>{p?.isSecretPrice?`Запроси условия участия в VENERA. Скидка на Чёрную пятницу ${discount(p)}.`:p?'Расскажи Анне, с каким запросом хочешь поработать.':'Расскажи, что тебя сейчас интересует, чтобы Анна могла подсказать формат.'}</p>
     {p&&<button className="button outline" disabled={!actions.enabled || !available(p) || !!chosen} onClick={()=>actions.toggle(p)}>{chosen?'ВЫБРАНО ✓':'ДОБАВИТЬ В МОЙ ВЫБОР'}</button>}
     <RequestText message={message}/>
   </Modal>;
