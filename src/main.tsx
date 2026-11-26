@@ -12,14 +12,14 @@ const venera = products.find(p=>p.id==='09')!;
 const bundle = products.find(p=>p.id==='duo')!;
 const guides = ['03','04'];
 const levels = [
-  { id:'discovery', roman:'I', name:'DISCOVERY', label:'Знакомство с собой', description:'Первые открытия, индивидуальные инструменты и возможность лучше узнать себя.', minimum:'от 2 000 ₽', image:'shadow', count:4 },
-  { id:'expansion', roman:'II', name:'EXPANSION', label:'Глубокое погружение', description:'Индивидуальная работа, исследование себя и новые знания.', minimum:'от 15 000 ₽', image:'water', count:3 },
-  { id:'transformation', roman:'III', name:'TRANSFORMATION', label:'Трансформация', description:'Мои самые глубокие авторские программы и длительная работа со мной.', minimum:'', image:'mountain', count:2 },
+  { id:'discovery', roman:'I', name:'DISCOVERY', label:'Знакомство с собой', description:'Первые открытия, индивидуальные инструменты и возможность лучше узнать себя.', discountSummary:'Скидки до 40%', image:'shadow', count:4 },
+  { id:'expansion', roman:'II', name:'EXPANSION', label:'Глубокое погружение', description:'Индивидуальная работа, исследование себя и новые знания.', discountSummary:'Скидки до 50%', image:'water', count:3 },
+  { id:'transformation', roman:'III', name:'TRANSFORMATION', label:'Трансформация', description:'Мои самые глубокие авторские программы и длительная работа со мной.', discountSummary:'', image:'mountain', count:2 },
 ];
 const money = (value:number) => new Intl.NumberFormat('ru-RU').format(value)+' ₽';
 const price = (p:Product) => p.salePrice === null ? 'SECRET PRICE — уточняется индивидуально' : money(p.salePrice);
 const campaignDiscounts: Record<string, number> = {
-  '01':40, '02':30, '03':35, '04':35, '05':40, '06':50, '08':50, '07':25, '09':30,
+  '01':40, '02':30, '03':35, '04':35, '05':50, '06':50, '08':30, '07':25, '09':30,
 };
 const percent = new Intl.NumberFormat('ru-RU', { style:'percent', maximumFractionDigits:0 });
 function discount(p:Product) {
@@ -97,7 +97,7 @@ function LevelNavigation({openThrough}:{openThrough:number}) {
       <img src={image(level.image as keyof typeof campaign.images)} alt="" loading="lazy"/>
       <div className="tile-content"><p className="eyebrow">LEVEL {level.roman}</p><h3>{level.name}</h3><p className="tile-label">{level.label}</p><hr/>
       <p className="tile-description">{level.description}</p>
-      {index<openThrough ? <><p className="tile-count">{level.count} предложения{level.minimum && <strong>{level.minimum}</strong>}</p>
+      {index<openThrough ? <><p className="tile-count">{level.count} предложения{level.discountSummary && <strong>{level.discountSummary}</strong>}</p>
       <a className="button outline" href={'#'+level.id}>СМОТРЕТЬ <span aria-hidden="true">⟶</span></a></> :
       <><p className="tile-count">Скоро откроется</p><span className="button locked-label"><LockIcon/> Закрыто до {levelOpeningDate[level.id]}</span></>}</div>
     </article>)}</div>
