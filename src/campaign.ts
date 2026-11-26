@@ -3,6 +3,7 @@ export const campaign = {
   end: '2026-11-30T00:00:00+03:00',
   timezone: 'Europe/Moscow',
   preview: false,
+  openThrough: 3,
   contact: '',
   payment: {} as Record<string, string>,
   legal: { privacy: '', terms: '', offer: '' },

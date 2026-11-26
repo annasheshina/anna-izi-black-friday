@@ -30,3 +30,8 @@ header{height:clamp(54px,5.3vw,76px);position:sticky;top:0;z-index:5;background:
   .hero-photo img{transform:translateX(clamp(68px,21vw,125px))}
   .hero-photo::after{background:linear-gradient(90deg,#1b130f 16%,#1b130fbb 24%,transparent 54%),linear-gradient(180deg,transparent 49%,#1b130f 98%)}
 }
+.lock-icon{display:inline-block;width:1em;height:1em;flex:none;vertical-align:-.12em}
+.locked-nav{opacity:.66;white-space:nowrap}
+.mobile-menu .locked-nav{padding:12px 2px;font:.85rem var(--sans)}
+.locked-tile img{filter:saturate(.55);opacity:.72}
+.locked-label{color:var(--ivory);background:#30251f;border-color:#b39069}

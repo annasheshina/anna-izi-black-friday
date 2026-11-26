@@ -48,14 +48,17 @@ const initialSelection = () => {
   return [];
 };
 
-function Header({count,open}:{count:number,open:()=>void}) {
+function Header({count,open,openThrough}:{count:number,open:()=>void,openThrough:number}) {
   const [menu,setMenu]=useState(false);
+  const links=levels.map((level,index)=>index<openThrough
+    ? <a key={level.id} href={'#'+level.id} onClick={()=>setMenu(false)}>{level.name}</a>
+    : <span key={level.id} className="locked-nav" aria-label={level.name+' — закрыто'}>{level.name} <LockIcon/></span>);
   return <header><div className="header-inner">
     <a className="logo" href="#top">ANNA IZI</a>
-    <nav aria-label="Уровни и продукты">{levels.map(level=><a key={level.id} href={'#'+level.id}>{level.name}</a>)}<a href="#welcome">О ПРОДУКТАХ</a></nav>
+    <nav aria-label="Уровни и продукты">{links}<a href="#welcome">О ПРОДУКТАХ</a></nav>
     {count ? <button className="button outline compact" onClick={open}>МОЙ ВЫБОР · {count}</button> : <a className="button outline compact" href="#levels">ВЫБРАТЬ СВОЁ</a>}
     <button className="menu-toggle" aria-label={menu?'Закрыть меню':'Открыть меню'} aria-expanded={menu} onClick={()=>setMenu(!menu)}>{menu?'×':'☰'}</button>
-    {menu && <div className="mobile-menu">{levels.map(level=><a key={level.id} href={'#'+level.id} onClick={()=>setMenu(false)}>{level.name}</a>)}<a href="#welcome" onClick={()=>setMenu(false)}>О ПРОДУКТАХ</a></div>}
+    {menu && <div className="mobile-menu">{links}<a href="#welcome" onClick={()=>setMenu(false)}>О ПРОДУКТАХ</a></div>}
   </div></header>;
 }
 
@@ -82,13 +85,21 @@ function WelcomeSection() {
     </div></section>;
 }
 
-function LevelNavigation() {
+const levelOpeningDate: Record<string, string> = { expansion:'28.11', transformation:'29.11' };
+
+function LockIcon() {
+  return <svg className="lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3m-4 4v3"/></svg>;
+}
+
+function LevelNavigation({openThrough}:{openThrough:number}) {
   return <section className="levels" id="levels"><p className="eyebrow">ТРИ УРОВНЯ</p><h2>Выбери свою глубину</h2>
-    <div className="level-grid">{levels.map(level=><article key={level.id} className={'level-tile '+level.id}>
+    <div className="level-grid">{levels.map((level,index)=><article key={level.id} className={'level-tile '+level.id+(index>=openThrough?' locked-tile':'')}>
       <img src={image(level.image as keyof typeof campaign.images)} alt="" loading="lazy"/>
       <div className="tile-content"><p className="eyebrow">LEVEL {level.roman}</p><h3>{level.name}</h3><p className="tile-label">{level.label}</p><hr/>
-      <p className="tile-description">{level.description}</p><p className="tile-count">{level.count} предложения{level.minimum && <strong>{level.minimum}</strong>}</p>
-      <a className="button outline" href={'#'+level.id}>СМОТРЕТЬ <span aria-hidden="true">⟶</span></a></div>
+      <p className="tile-description">{level.description}</p>
+      {index<openThrough ? <><p className="tile-count">{level.count} предложения{level.minimum && <strong>{level.minimum}</strong>}</p>
+      <a className="button outline" href={'#'+level.id}>СМОТРЕТЬ <span aria-hidden="true">⟶</span></a></> :
+      <><p className="tile-count">Скоро откроется</p><span className="button locked-label"><LockIcon/> Закрыто до {levelOpeningDate[level.id]}</span></>}</div>
     </article>)}</div>
   </section>;
 }
@@ -198,23 +209,25 @@ function App() {
   useEffect(()=>{const refresh=()=>setNow(Date.now());const id=setInterval(refresh,1000);window.addEventListener('focus',refresh);return ()=>{clearInterval(id);window.removeEventListener('focus',refresh);};},[]);
   useEffect(()=>{try {localStorage.setItem('anna-izi-selection',JSON.stringify(selected));}catch { /* The session selection still works. */ }},[selected]);
   const preview=campaign.preview || location.protocol==='file:' || (import.meta.env.DEV && new URLSearchParams(location.search).get('preview')==='1');
+  const previewDay=document.querySelector<HTMLMetaElement>('meta[name="campaign-preview-day"]')?.content;
+  const openThrough=previewDay==='1'?1:previewDay==='2'?2:campaign.openThrough;
   const before=now < Date.parse(campaign.start);
   const ended=now >= Date.parse(campaign.end);
   const enabled=preview || (!before && !ended);
-  const status=preview?'Режим предварительного просмотра':before?'Предложения откроются 27 ноября в 00:00 по Москве.':ended?'Специальные условия Чёрной пятницы завершились.':'';
+  const status=preview?(previewDay?'Предпросмотр · День '+previewDay:'Режим предварительного просмотра'):before?'Предложения откроются 27 ноября в 00:00 по Москве.':ended?'Специальные условия Чёрной пятницы завершились.':'';
   const remove=(id:string)=>setSelected(current=>current.filter(key=>key!==id));
   const actions:Purchase={selected,enabled,inquire:setModal,toggle:p=>{
-    if (!enabled || !available(p)) return;
+    if (!enabled || p.level>openThrough || !available(p)) return;
     setSelected(current=>{
       if(current.includes(p.id)) return current.filter(id=>id!==p.id);
       if(guides.includes(p.id) && current.includes('duo')) return current;
       return [...current.filter(id=>p.id!=='duo' || !guides.includes(id)),p.id];
     });
   }};
-  const items=products.filter(p=>selected.includes(p.id));
+  const items=products.filter(p=>p.level<=openThrough && selected.includes(p.id));
   const known=items.filter(p=>p.salePrice!==null);
   const total=[known.length?money(known.reduce((sum,p)=>sum+p.salePrice!,0)):'',items.some(p=>p.isSecretPrice)?'стоимость VENERA':''].filter(Boolean).join(' + ');
-  return <div id="top"><Header count={items.length} open={()=>setModal('selection')}/><main><Hero/><CampaignInfo status={status}/><WelcomeSection/><LevelNavigation/><LevelSection level={1} actions={actions}/><EditorialTransition/><LevelSection level={2} actions={actions}/><EditorialTransition deep/><PrivateWorkSection actions={actions}/><VeneraSection actions={actions}/><FinalCTA help={()=>setModal('help')}/></main><Footer/>
+  return <div id="top"><Header count={items.length} open={()=>setModal('selection')} openThrough={openThrough}/><main><Hero/><CampaignInfo status={status}/><WelcomeSection/><LevelNavigation openThrough={openThrough}/><LevelSection level={1} actions={actions}/>{openThrough>=2 && <><EditorialTransition/><LevelSection level={2} actions={actions}/></>}{openThrough>=3 && <><EditorialTransition deep/><PrivateWorkSection actions={actions}/><VeneraSection actions={actions}/></>}<FinalCTA help={()=>setModal('help')}/></main><Footer/>
   {items.length>0 && <aside className="selection-bar" aria-label="Твоя подборка"><span>МОЙ ВЫБОР · {items.length} {items.length===1?'продукт':items.length<5?'продукта':'продуктов'} · {total}</span><button className="button gold compact" onClick={()=>setModal('selection')}>ПОСМОТРЕТЬ →</button></aside>}
   {modal==='selection'&&<SelectionDrawer items={items} total={total} remove={remove} actions={actions} close={()=>setModal(null)}/>}
   {modal&&modal!=='selection'&&<ContactModal p={modal==='help'?null:modal} actions={actions} close={()=>setModal(null)}/>}</div>;
