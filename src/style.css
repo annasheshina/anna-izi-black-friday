@@ -26,3 +26,7 @@ header{height:clamp(54px,5.3vw,76px);position:sticky;top:0;z-index:5;background:
 .selection-list .discount{margin-top:5px}
 .selection-list .discount-star{width:3.15rem;font-size:.7rem}
 .secret-discount .discount-star{width:5.5rem;font-size:1.16rem}
+@media(max-width:700px){
+  .hero-photo img{transform:translateX(clamp(68px,21vw,125px))}
+  .hero-photo::after{background:linear-gradient(90deg,#1b130f 16%,#1b130fbb 24%,transparent 54%),linear-gradient(180deg,transparent 49%,#1b130f 98%)}
+}
