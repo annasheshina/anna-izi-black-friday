@@ -18,6 +18,12 @@ const levels = [
 ];
 const money = (value:number) => new Intl.NumberFormat('ru-RU').format(value)+' ₽';
 const price = (p:Product) => p.salePrice === null ? 'SECRET PRICE — уточняется индивидуально' : money(p.salePrice);
+const percent = new Intl.NumberFormat('ru-RU', { style:'percent', maximumFractionDigits:1 });
+function discount(p:Product) {
+  if (p.isSecretPrice) return '−30% на оба тарифа';
+  if (p.oldPrice === null || p.salePrice === null || p.oldPrice <= p.salePrice) return '';
+  return '−'+percent.format((p.oldPrice-p.salePrice)/p.oldPrice);
+}
 const image = (name: keyof typeof campaign.images) => {
   const path=campaign.images[name];
   return path.startsWith('data:') ? path : import.meta.env.BASE_URL+path;
@@ -97,7 +103,8 @@ function PurchaseButton({p,actions,contact=false}:{p:Product,actions:Purchase,co
   </button>;
 }
 function Prices({p}:{p:Product}) {
-  return <div className="prices">{p.oldPrice!==null && <del>{money(p.oldPrice)}</del>}<strong>{price(p)}</strong></div>;
+  const label=discount(p);
+  return <div className="prices">{p.oldPrice!==null && <del>{money(p.oldPrice)}</del>}<strong>{price(p)}</strong>{label && <span className="discount">Скидка {label}</span>}</div>;
 }
 function ProductCard({p,actions}:{p:Product,actions:Purchase}) {
   return <article className="product-card"><ProductArt p={p}/><div className="product-content">
@@ -135,7 +142,7 @@ function VeneraSection({actions}:{actions:Purchase}) {
     <div className="venera-copy"><h3>{p.headline}</h3><Paragraphs items={p.description}/></div>
     <div className="venera-format">{p.format.map(label=><span key={label}>{label.toUpperCase()}</span>)}</div>
     <p className="venera-note">Роскошные задания и работа с мышлением.</p>
-    <div className="secret"><p className="eyebrow">PRIVATE BLACK FRIDAY OFFER</p><h3>SECRET PRICE</h3><p className="product-headline">−30% на оба тарифа</p><p>На Чёрную пятницу я подготовила особые условия участия в моём легендарном курсе.</p><p>Хочешь узнать подробности и выбрать свой формат?</p><PurchaseButton p={p} actions={actions} contact/></div>
+    <div className="secret"><p className="eyebrow">PRIVATE BLACK FRIDAY OFFER</p><h3>SECRET PRICE</h3><p className="product-headline">Скидка {discount(p)}</p><p>На Чёрную пятницу я подготовила особые условия участия в моём легендарном курсе.</p><p>Хочешь узнать подробности и выбрать свой формат?</p><PurchaseButton p={p} actions={actions} contact/></div>
   </section>;
 }
 function FinalCTA({help}:{help:()=>void}) {
@@ -160,7 +167,7 @@ function RequestText({message}:{message:string}) {
 function SelectionDrawer({items,total,remove,actions,close}:{items:Product[],total:string,remove:(id:string)=>void,actions:Purchase,close:()=>void}) {
   const savings=items.length && items.every(p=>p.oldPrice!==null && p.salePrice!==null)?items.reduce((sum,p)=>sum+p.oldPrice!-p.salePrice!,0):null;
   const request='Привет! Хочу воспользоваться предложениями BLACK FRIDAY.\n\nМой выбор:\n'+items.map((p,i)=>(i+1)+'. '+p.name+' — '+price(p)+'.').join('\n')+'\n\nИтого: '+total+'.\n\nХочу уточнить условия приобретения.';
-  return <Modal title="Мой выбор" close={close} drawer>{items.length?<><ul className="selection-list">{items.map(p=><li key={p.id}><div><strong>{p.name}</strong><div>{p.oldPrice!==null && <del>{money(p.oldPrice)}</del>} {price(p)}</div>{actions.enabled && available(p) && campaign.payment[p.id] && <a href={campaign.payment[p.id]}>Перейти к оплате</a>}</div><button className="remove" aria-label={'Удалить '+p.name} onClick={()=>remove(p.id)}>×</button></li>)}</ul>
+  return <Modal title="Мой выбор" close={close} drawer>{items.length?<><ul className="selection-list">{items.map(p=><li key={p.id}><div><strong>{p.name}</strong><div>{p.oldPrice!==null && <del>{money(p.oldPrice)}</del>} {price(p)}</div>{discount(p) && <span className="discount">Скидка {discount(p)}</span>}{actions.enabled && available(p) && campaign.payment[p.id] && <a href={campaign.payment[p.id]}>Перейти к оплате</a>}</div><button className="remove" aria-label={'Удалить '+p.name} onClick={()=>remove(p.id)}>×</button></li>)}</ul>
     {guides.every(id=>actions.selected.includes(id)) && available(bundle) && actions.enabled && <div className="bundle-prompt"><p>Ты выбрала оба журнала. Для тебя есть специальная цена комплекта — 8 888 ₽ вместо 10 000 ₽.</p><button className="button primary" onClick={()=>actions.toggle(bundle)}>ВЫБРАТЬ КОМПЛЕКТ</button></div>}
     <p><strong>Итого: {total}</strong></p>{savings!==null&&<p>Выгода: {money(savings)}</p>}<RequestText message={request}/></>:<p>Подборка пока пуста.</p>}</Modal>;
 }
