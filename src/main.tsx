@@ -191,7 +191,7 @@ function SelectionDrawer({items,total,remove,actions,close}:{items:Product[],tot
   const request='Привет! Хочу воспользоваться предложениями BLACK FRIDAY.\n\nМой выбор:\n'+items.map((p,i)=>(i+1)+'. '+p.name+' — '+price(p)+'.').join('\n')+'\n\nИтого: '+total+'.\n\nХочу уточнить условия приобретения.';
   return <Modal title="Мой выбор" close={close} drawer>{items.length?<><ul className="selection-list">{items.map(p=><li key={p.id}><div><strong>{p.name}</strong><div>{p.oldPrice!==null && <del>{money(p.oldPrice)}</del>} {price(p)}</div>{discount(p) && <DiscountBadge label={discount(p)}/>}{actions.enabled && available(p) && campaign.payment[p.id] && <a href={campaign.payment[p.id]}>Перейти к оплате</a>}</div><button className="remove" aria-label={'Удалить '+p.name} onClick={()=>remove(p.id)}>×</button></li>)}</ul>
     {guides.every(id=>actions.selected.includes(id)) && available(bundle) && actions.enabled && <div className="bundle-prompt"><p>Ты выбрала оба журнала. Для тебя есть специальная цена комплекта — 8 888 ₽ вместо 10 000 ₽.</p><button className="button primary" onClick={()=>actions.toggle(bundle)}>ВЫБРАТЬ КОМПЛЕКТ</button></div>}
-    <p><strong>Итого: {total}</strong></p>{savings!==null&&<p>Выгода: {money(savings)}</p>}<RequestText message={request}/></>:<p>Подборка пока пуста.</p>}</Modal>;
+    <p><strong>Итого: {total}</strong></p>{savings!==null&&<p>Выгода: {money(savings)}</p>}<RequestText message={request} chatLink={campaign.businessLinks.selection}/></>:<p>Подборка пока пуста.</p>}</Modal>;
 }
 function ContactModal({p,actions,close}:{p:Product|null,actions:Purchase,close:()=>void}) {
   const chosen=p && actions.selected.includes(p.id);
