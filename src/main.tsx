@@ -181,17 +181,17 @@ function Modal({title,close,children,drawer=false}:{title:string,close:()=>void,
     <div className="dialog-content"><button className="close" aria-label="Закрыть" onClick={close}>×</button><h2 id="dialog-title">{title}</h2>{children}</div>
   </dialog>;
 }
-function RequestText({message,chatLink,selection=false}:{message:string,chatLink:string,selection?:boolean}) {
+function RequestText({message,chatLink}:{message:string,chatLink?:string}) {
   const [copied,setCopied]=useState('');
   const copy=async()=>{try {await navigator.clipboard.writeText(message);setCopied('Текст скопирован.');} catch {setCopied('Выдели и скопируй текст из поля.');}};
-  return <><textarea readOnly value={message} aria-label="Текст заявки" onFocus={e=>e.currentTarget.select()}/><p>Скопируй это сообщение и отправь мне в личные сообщения.</p>{selection && <p>Чтобы отправить весь список, замени черновик в Telegram скопированным текстом.</p>}<div className="actions"><button className="button primary" onClick={copy}>СКОПИРОВАТЬ</button>{chatLink&&<a className="button outline" href={chatLink} target="_blank" rel="noreferrer">Отправить в ЛС</a>}</div><p role="status">{copied}</p></>;
+  return <><textarea readOnly value={message} aria-label="Текст заявки" onFocus={e=>e.currentTarget.select()}/><p>Скопируй это сообщение и отправь мне в личные сообщения.</p><div className="actions"><button className="button primary" onClick={copy}>СКОПИРОВАТЬ</button>{chatLink&&<a className="button outline" href={chatLink} target="_blank" rel="noreferrer">Отправить в ЛС</a>}</div><p role="status">{copied}</p></>;
 }
 function SelectionDrawer({items,total,remove,actions,close}:{items:Product[],total:string,remove:(id:string)=>void,actions:Purchase,close:()=>void}) {
   const savings=items.length && items.every(p=>p.oldPrice!==null && p.salePrice!==null)?items.reduce((sum,p)=>sum+p.oldPrice!-p.salePrice!,0):null;
   const request='Привет! Хочу воспользоваться предложениями BLACK FRIDAY.\n\nМой выбор:\n'+items.map((p,i)=>(i+1)+'. '+p.name+' — '+price(p)+'.').join('\n')+'\n\nИтого: '+total+'.\n\nХочу уточнить условия приобретения.';
   return <Modal title="Мой выбор" close={close} drawer>{items.length?<><ul className="selection-list">{items.map(p=><li key={p.id}><div><strong>{p.name}</strong><div>{p.oldPrice!==null && <del>{money(p.oldPrice)}</del>} {price(p)}</div>{discount(p) && <DiscountBadge label={discount(p)}/>}{actions.enabled && available(p) && campaign.payment[p.id] && <a href={campaign.payment[p.id]}>Перейти к оплате</a>}</div><button className="remove" aria-label={'Удалить '+p.name} onClick={()=>remove(p.id)}>×</button></li>)}</ul>
     {guides.every(id=>actions.selected.includes(id)) && available(bundle) && actions.enabled && <div className="bundle-prompt"><p>Ты выбрала оба журнала. Для тебя есть специальная цена комплекта — 8 888 ₽ вместо 10 000 ₽.</p><button className="button primary" onClick={()=>actions.toggle(bundle)}>ВЫБРАТЬ КОМПЛЕКТ</button></div>}
-    <p><strong>Итого: {total}</strong></p>{savings!==null&&<p>Выгода: {money(savings)}</p>}<RequestText message={request} chatLink={campaign.businessLinks.selection} selection/></>:<p>Подборка пока пуста.</p>}</Modal>;
+    <p><strong>Итого: {total}</strong></p>{savings!==null&&<p>Выгода: {money(savings)}</p>}<RequestText message={request}/></>:<p>Подборка пока пуста.</p>}</Modal>;
 }
 function ContactModal({p,actions,close}:{p:Product|null,actions:Purchase,close:()=>void}) {
   const chosen=p && actions.selected.includes(p.id);
