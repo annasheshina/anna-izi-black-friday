@@ -168,7 +168,7 @@ function VeneraSection({actions}:{actions:Purchase}) {
   </section>;
 }
 function FinalCTA({help}:{help:()=>void}) {
-  return <section className="final"><p className="eyebrow">ANNA IZI — PRIVATE BLACK FRIDAY</p><h2>Что сейчас твоё?</h2><Paragraphs items={content.copy.final.split('\n\n')}/><div className="actions"><a className="button gold" href="#levels">ВЫБРАТЬ СВОЁ ↑</a>{campaign.contact ? <a className="button outline" href={campaign.contact} target="_blank" rel="noreferrer">ПОМОГИ МНЕ ВЫБРАТЬ</a>:<button className="button outline" onClick={help}>ПОМОГИ МНЕ ВЫБРАТЬ</button>}</div></section>;
+  return <section className="final"><p className="eyebrow">ANNA IZI — PRIVATE BLACK FRIDAY</p><h2>Что сейчас твоё?</h2><Paragraphs items={content.copy.final.split('\n\n')}/><div className="actions"><a className="button gold" href="#levels">ВЫБРАТЬ СВОЁ ↑</a><button className="button outline" onClick={help}>ПОМОГИ МНЕ ВЫБРАТЬ</button></div></section>;
 }
 function Footer() {
   const links=[['Telegram',campaign.contact],['Контакты',campaign.contact],['Политика конфиденциальности',campaign.legal.privacy],['Условия приобретения',campaign.legal.terms],['Публичная оферта',campaign.legal.offer]];
@@ -184,7 +184,7 @@ function Modal({title,close,children,drawer=false}:{title:string,close:()=>void,
 function RequestText({message}:{message:string}) {
   const [copied,setCopied]=useState('');
   const copy=async()=>{try {await navigator.clipboard.writeText(message);setCopied('Текст скопирован.');} catch {setCopied('Выдели и скопируй текст из поля.');}};
-  return <><textarea readOnly value={message} aria-label="Текст заявки" onFocus={e=>e.currentTarget.select()}/><div className="actions"><button className="button primary" onClick={copy}>СКОПИРОВАТЬ</button>{campaign.contact&&<a className="button outline" href={campaign.contact} target="_blank" rel="noreferrer">ОТКРЫТЬ TELEGRAM</a>}</div><p role="status">{copied}</p></>;
+  return <><textarea readOnly value={message} aria-label="Текст заявки" onFocus={e=>e.currentTarget.select()}/><div className="actions"><button className="button primary" onClick={copy}>СКОПИРОВАТЬ</button>{campaign.contact&&<a className="button outline" href={campaign.contact+'?text='+encodeURIComponent(message)} target="_blank" rel="noreferrer">ОТПРАВИТЬ В TELEGRAM</a>}</div><p role="status">{copied}</p></>;
 }
 function SelectionDrawer({items,total,remove,actions,close}:{items:Product[],total:string,remove:(id:string)=>void,actions:Purchase,close:()=>void}) {
   const savings=items.length && items.every(p=>p.oldPrice!==null && p.salePrice!==null)?items.reduce((sum,p)=>sum+p.oldPrice!-p.salePrice!,0):null;

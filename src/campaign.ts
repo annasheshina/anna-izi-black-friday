@@ -4,7 +4,7 @@ export const campaign = {
   timezone: 'Europe/Moscow',
   preview: false,
   openThrough: 3,
-  contact: '',
+  contact: 'https://t.me/anna_izumova',
   payment: {} as Record<string, string>,
   legal: { privacy: '', terms: '', offer: '' },
   images: { portrait: 'portrait.jpg', hills: 'hills.jpg', shadow: 'shadow.jpg', water: 'water.jpg', mountain: 'mountain.jpg', signature: 'signature.png' },
