@@ -19,7 +19,7 @@ const levels = [
 const money = (value:number) => new Intl.NumberFormat('ru-RU').format(value)+' ₽';
 const price = (p:Product) => p.salePrice === null ? 'SECRET PRICE — уточняется индивидуально' : money(p.salePrice);
 const campaignDiscounts: Record<string, number> = {
-  '01':40, '02':30, '03':35, '04':35, '05':50, '06':50, '08':30, '07':25, '09':30,
+  '01':30, '02':30, '03':35, '04':35, '05':50, '06':50, '08':30, '07':25, '09':30,
 };
 const percent = new Intl.NumberFormat('ru-RU', { style:'percent', maximumFractionDigits:0 });
 function discount(p:Product) {
