@@ -182,9 +182,7 @@ function Modal({title,close,children,drawer=false}:{title:string,close:()=>void,
   </dialog>;
 }
 function RequestText({message}:{message:string}) {
-  const [copied,setCopied]=useState('');
-  const copy=async()=>{try {await navigator.clipboard.writeText(message);setCopied('Текст скопирован.');} catch {setCopied('Выдели и скопируй текст из поля.');}};
-  return <><textarea readOnly value={message} aria-label="Текст заявки" onFocus={e=>e.currentTarget.select()}/><div className="actions"><button className="button primary" onClick={copy}>СКОПИРОВАТЬ</button>{campaign.contact&&<a className="button outline" href={campaign.contact+'?text='+encodeURIComponent(message)} target="_blank" rel="noreferrer">Отправить в ЛС</a>}</div><p role="status">{copied}</p></>;
+  return <><textarea readOnly value={message} aria-label="Текст заявки" onFocus={e=>e.currentTarget.select()}/>{campaign.contact && <div className="actions"><a className="button primary" href={campaign.contact+'?text='+encodeURIComponent(message)} target="_blank" rel="noreferrer">Отправить в ЛС</a></div>}</>;
 }
 function SelectionDrawer({items,total,remove,actions,close}:{items:Product[],total:string,remove:(id:string)=>void,actions:Purchase,close:()=>void}) {
   const savings=items.length && items.every(p=>p.oldPrice!==null && p.salePrice!==null)?items.reduce((sum,p)=>sum+p.oldPrice!-p.salePrice!,0):null;
